@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+
+        <title>Adversarial Detection</title>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+        <link rel="stylesheet" href="dist/reveal.css">
+        <link rel="stylesheet" href="dist/theme/white.css" id="theme">
+        <link rel="stylesheet" href="plugin/highlight/monokai.css">
+        
+        <link rel="stylesheet" href="style.css">
+
+        <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+        <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="plugin/chalkboard/style.css">
+        <link rel="stylesheet" href="plugin/customcontrols/style.css">
+
+    </head>
+
+    <body>
+
+        <div class="reveal" >
+
+            <div class="slides">
+
+                <section data-auto-animate>
+                    <span class="menu-title" style="display: none">Overview</span>
+                    <h3 class="r-fit-text">Adversarial Detection: Attacking Object Detection in Real Time</h3>
+                    <p class="name" style="font-size: 25px;">Han Wu, Syed Yunas, Sareh Rowlands, Wenjie Ruan, and Johan Wahlstrom</p>
+                    <div class="r-hstack">
+                        <img class="" src="images/overview.jpg" width="80%"> 
+                    </div>
+                    <p style="font-size: 22px;"><i class="fab fa-github"></i> &nbsp; <a href="https://github.com/wuhanstudio/adversarial-detection">Source Code</a></p>
+                    <aside class="notes">
+                        Hi, everyone. I will present Adversarial Detection: Attacking Object Detection in Real Time. Some robotic applications rely on object detection models to perceive the environment. <br />
+                        <br />
+                        For example, an autonomous driving system relies on object detection models to detect traffic signs and pedestrians. <br/>
+                        <br />
+                        Our research demonstrates that we can attack object detection models in real time. We can fabricate bounding boxes at desired locations. We can even specify which kind of traffic sign to fabricate. For example, the multi-untargeted attack generates all different kinds of traffic signs. We have 30, 60, the stop sign. While the multi-targeted attack only generates the desired traffic sign, we only have stop signs here. <br />
+                        <br />
+                        Before introducing our method, <br/>
+                    </aside>
+                </section>
+
+                <section data-menu-title="Adversarial Overlay">
+                    <div class="r-vstack">
+                        <div class="" style="margin-bottom: 0;">
+                            <img src="images/digital_filter.jpg" style="margin-top:0; margin-bottom: 0;" width="85%" />
+                            <p style="font-size: 22px; margin-top: 0; margin-bottom: 10px;">Adversarial Filter</p>
+                            <img src="images/physical_patch.jpg" style="margin-top:0; margin-bottom: 0;" width="85%" />
+                            <p style="font-size: 22px; margin-top: 0; margin-bottom: 20px;">Adversarial Patch</p>
+                        </div>
+                        <div class="fragment">
+                            <img src="images/overlay.jpg" style="margin-top:0; margin-bottom: 0;" width="53%" />
+                            <p style="font-size: 22px; margin-top: 0; margin-bottom: 0;">Adversarial Overlay</p>
+                        </div>
+                        <div class="fragment">
+                            <p style="font-size: 22px;">How different attacks apply the perturbation $\delta$ using  a binary mask $m \in \{0, 1\}^{wh}$</p>
+                            <p style="font-size: 20px;">
+                                $x^{'}_{filter} = x + \delta$ 
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+                                $x^{'}_{overlay} = x + m \odot \delta$
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+                                $x^{'}_{patch} = (1-m) \odot x + m \odot \delta$</p>
+                            </div>
+                        </div>
+
+                        <aside class="notes">
+                            Prior research used adversarial filter and adversarial patch to fool object detection models. <br/>
+                            <br />
+                            The Adversarial Filter applies the perturbation to the entire input image. The perturbation is unperceivable by human eyes. While the Adversarial Patch applies the perturbation to a small region of the input image, but the perturbation is perceivable by human eyes.  Besides, the adversarial patch can control where we fabricate objects, while the adversarial filter cannot.<br />
+                            <br />
+                            By combining adversarial filters' imperceptibility and adversarial patches' localizability, we generate adversarial overlays, which means we generate human unperceivable perturbation at a small region of the input image. Mathematically, we summarize how different methods apply the pertubation in different ways.
+                        </aside>
+                </section>
+
+                <!-- <section>
+                    <div class="r-hstack">
+                        <img src="images/image_specific.png" width="40%" />
+                        <img src="images/image_agnostic.png" class="fragment" width="40%" />
+                    </div>
+                </section> -->
+
+                <section data-background-video="images/gazebo.mp4" data-background-video data-background-video-muted data-menu-title="ROS Demo">
+                    <aside class="notes">
+                        Let's see a real-time demo. We tested our attacks in ROS Gazebo Simulator. The obeject detection model seems to be stable. Now let's generate some traffic signs in the air. Interesting, isn't it?
+                    </aside>
+                </section>
+
+                <section data-menu-title="Adversarial Loss">
+                    <div style="text-align: left; font-size: 25px;">
+                        <p>Given an input image $x$, the object detection model outputs $S \times S$ candidate bounding boxes $o \in \mathcal{O}$ at three different scales ($S \in \{13,26,52\}$, $B=3$, $|\mathcal{O}| = S \times S$). </p>
+                        <p>Each candidate box $o^i$ contains $(b_x^i, b_y^i, b_w^i, b_h^i, c^i, p_1^i, p_2^i, ..., p_K^i)$ for K classes, where $0 \leq i \leq |\mathcal{O}|$.</p>
+                    </div>
+                    <div class="r-vstack" style="font-size: 25px;">
+                        <p>$$\begin{aligned} \text{One-Targeted}:\ \mathcal{L}_{adv}^{1}(\mathcal{O}) &= \sum^B \max_{1 \leq i \leq |\mathcal{O}|}\ [\sigma(c^i) * \sigma(p^i_t)] \\
+                            \text{Multi-Targeted}:\ \mathcal{L}_{adv}^{2}(\mathcal{O}) &= \sum^B \sum^{|\mathcal{O}|}_{i = 1}\ [\sigma(c^i) * \sigma(p^i_t)] \\
+                            \text{Multi-Untargeted}:\ \mathcal{L}_{adv}^{3}(\mathcal{O}) &= \sum^B \sum^{|\mathcal{O}|}_{i = 1} \sum_{j=1}^{K}\ [\sigma(c^i) *\sigma(p^i_j)] \end{aligned}$$</p>
+                        </div>
+
+                    <aside class="notes">
+                        In the research paper, we introduce how we generate adversarial overlays using three adversarial loss functions. You can also test our attacks without using Turtlebot. 
+                    </aside>
+                    </section>
+
+                <section data-background-video="images/pc.mp4" data-background-video data-background-video-muted data-menu-title="PC Demo">
+                    <aside class="notes">
+                        Here we demonstrate our attacks using a USB camera. For example, let's fabricate some objects at right top corner. Now, we have umbrella and person.  We open-sourced our system on Guthub.
+                    </aside>
+                </section>
+
+                <section>
+                    <h2>Thanks</h2>
+                    <div class="r-vstack">
+                        <p><a href="https://detection.wuhanstudio.uk/">https://detection.wuhanstudio.uk</a></p>
+                    </div>
+                    <img src="images/qrcode.png" width="25%" />
+                    <p style="font-size: 22px;"><i class="fab fa-github"></i> &nbsp; <a href="https://github.com/wuhanstudio/adversarial-detection">Source Code</a></p>
+
+                    <aside class="notes">
+                        You can find the source code and the slides on this website. <br />
+                        <br />
+                        <!-- In conclusion, our research demonstrates how to generate adversarial overlays of arbitrary shapes at desired positions in real time. <br /> -->
+                        <!-- <br /> -->
+                        Our real-time attack could jeopardize real-world robotic applications. Deep learning security is important, especially for safety-critical robotic applications. Thank you.
+                    </aside>
+                </section>
+            </div>
+        </div>
+
+        <script src="dist/reveal.js"></script>
+        <script src="plugin/chalkboard/plugin.js"></script>
+        <script src="plugin/customcontrols/plugin.js"></script>
+        <script src="plugin/menu/menu.js"></script>
+        <script src="plugin/math/math.js"></script>
+        <script src="plugin/highlight/highlight.js"></script>
+
+        <script>
+            Reveal.initialize({
+                center: true,
+                hash: true,
+                plugins: [ RevealHighlight, RevealMath, RevealMenu, RevealChalkboard, RevealCustomControls ],
+                mathjax: 'https://cdn.jsdelivr.net/gh/mathjax/mathjax@2.7.8/MathJax.js',
+                config: 'TeX-AMS_HTML-full',
+                // pass other options into `MathJax.Hub.Config()`
+                TeX: { Macros: { RR: "{\\bf R}" } },
+                menu: {
+                    hideMissingTitles: true,
+                },
+                chalkboard: {
+                    boardmarkerWidth: 3,
+                    chalkWidth: 7,
+                    chalkEffect: 1.0,
+                    storage: null,
+                    src: null,
+                    readOnly: undefined,
+                    transition: 800,
+                    theme: "chalkboard",
+                    background: [ 'rgba(127,127,127,.1)' , path + 'img/blackboard.png' ],
+                    grid: { color: 'rgb(50,50,10,0.5)', distance: 80, width: 2},
+                    eraser: { src: path + 'img/sponge.png', radius: 20},
+                    boardmarkers : [
+                            { color: 'rgba(100,100,100,1)', cursor: 'url(' + path + 'img/boardmarker-black.png), auto'},
+                            { color: 'rgba(30,144,255, 1)', cursor: 'url(' + path + 'img/boardmarker-blue.png), auto'},
+                            { color: 'rgba(220,20,60,1)', cursor: 'url(' + path + 'img/boardmarker-red.png), auto'},
+                            { color: 'rgba(50,205,50,1)', cursor: 'url(' + path + 'img/boardmarker-green.png), auto'},
+                            { color: 'rgba(255,140,0,1)', cursor: 'url(' + path + 'img/boardmarker-orange.png), auto'},
+                            { color: 'rgba(150,0,20150,1)', cursor: 'url(' + path + 'img/boardmarker-purple.png), auto'},
+                            { color: 'rgba(255,220,0,1)', cursor: 'url(' + path + 'img/boardmarker-yellow.png), auto'}
+                    ],
+                    chalks: [
+                            { color: 'rgba(255,255,255,0.5)', cursor: 'url(' + path + 'img/chalk-white.png), auto'},
+                            { color: 'rgba(96, 154, 244, 0.5)', cursor: 'url(' + path + 'img/chalk-blue.png), auto'},
+                            { color: 'rgba(237, 20, 28, 0.5)', cursor: 'url(' + path + 'img/chalk-red.png), auto'},
+                            { color: 'rgba(20, 237, 28, 0.5)', cursor: 'url(' + path + 'img/chalk-green.png), auto'},
+                            { color: 'rgba(220, 133, 41, 0.5)', cursor: 'url(' + path + 'img/chalk-orange.png), auto'},
+                            { color: 'rgba(220,0,220,0.5)', cursor: 'url(' + path + 'img/chalk-purple.png), auto'},
+                            { color: 'rgba(255,220,0,0.5)', cursor: 'url(' + path + 'img/chalk-yellow.png), auto'}
+                    ]
+                },
+                customcontrols: {
+                    controls: [
+                        { icon: '<i class="fa fa-pen-square"></i>',
+                        title: 'Toggle chalkboard (B)',
+                        action: 'RevealChalkboard.toggleChalkboard();'
+                        },
+                        { icon: '<i class="fa fa-pen"></i>',
+                        title: 'Toggle notes canvas (C)',
+                        action: 'RevealChalkboard.toggleNotesCanvas();'
+                        }
+                    ]
+                },
+                // showNotes: true,
+            });
+        </script>
+    </body>
+</html>
