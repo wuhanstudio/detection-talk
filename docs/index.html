@@ -96,14 +96,20 @@
 
                 <section data-menu-title="Adversarial Loss">
                     <div style="text-align: left; font-size: 25px;">
-                        <p>Given an input image $x$, the object detection model outputs $S \times S$ candidate bounding boxes $o \in \mathcal{O}$ at three different scales ($S \in \{13,26,52\}$, $B=3$, $|\mathcal{O}| = S \times S$). </p>
+                        <p>Given an input image $x$, the object detection model outputs $S \times S$ candidate bounding boxes $o \in \mathcal{O}$ at three different scales.</p>
+                        <!-- <p>Given an input image $x$, the object detection model outputs $S \times S$ candidate bounding boxes $o \in \mathcal{O}$ at three different scales ($S \in \{13,26,52\}$, $B=3$, $|\mathcal{O}| = S \times S$). </p> -->
                         <p>Each candidate box $o^i$ contains $(b_x^i, b_y^i, b_w^i, b_h^i, c^i, p_1^i, p_2^i, ..., p_K^i)$ for K classes, where $0 \leq i \leq |\mathcal{O}|$.</p>
                     </div>
                     <div class="r-vstack" style="font-size: 25px;">
-                        <p>$$\begin{aligned} \text{One-Targeted}:\ \mathcal{L}_{adv}^{1}(\mathcal{O}) &= \sum^B \max_{1 \leq i \leq |\mathcal{O}|}\ [\sigma(c^i) * \sigma(p^i_t)] \\
-                            \text{Multi-Targeted}:\ \mathcal{L}_{adv}^{2}(\mathcal{O}) &= \sum^B \sum^{|\mathcal{O}|}_{i = 1}\ [\sigma(c^i) * \sigma(p^i_t)] \\
-                            \text{Multi-Untargeted}:\ \mathcal{L}_{adv}^{3}(\mathcal{O}) &= \sum^B \sum^{|\mathcal{O}|}_{i = 1} \sum_{j=1}^{K}\ [\sigma(c^i) *\sigma(p^i_j)] \end{aligned}$$</p>
-                        </div>
+                        <p>
+                            $$\begin{aligned} \text{One-Targeted}:\ \mathcal{L}_{adv}^{1}(\mathcal{O}) &= \max_{1 \leq i \leq |\mathcal{O}|}\ [\sigma(c^i) * \sigma(p^i_t)] \\
+                            \text{Multi-Targeted}:\ \mathcal{L}_{adv}^{2}(\mathcal{O}) &= \sum^{|\mathcal{O}|}_{i = 1}\ [\sigma(c^i) * \sigma(p^i_t)] \\
+                            \text{Multi-Untargeted}:\ \mathcal{L}_{adv}^{3}(\mathcal{O}) &= \sum^{|\mathcal{O}|}_{i = 1} \sum_{j=1}^{K}\ [\sigma(c^i) *\sigma(p^i_j)] \end{aligned}$$
+                        </p>
+                    </div>
+                    <p style="text-align: left; font-size: 25px;">
+                        where $|\mathcal{O}| = \sum_{1 \leq i \leq 3} S_i \times S_i \times B$, and $S_i$ represents the grid size of the $i_{th}$ output layer ($S \in \{13,26,52\}$, $B=3$).
+                    </p>
 
                     <aside class="notes">
                         In the research paper, we introduce how we generate adversarial overlays using three adversarial loss functions. You can also test our attacks without using Turtlebot. 
